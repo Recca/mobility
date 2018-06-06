@@ -169,7 +169,6 @@ describe "Mobility::Backends::Sequel::Table", orm: :sequel do
     end
 
     describe "mobility scope (.i18n)" do
-      before { Article.translates :title, :content, backend: :table, cache: true }
       include_querying_examples('Article')
     end
   end

@@ -75,8 +75,6 @@ Implements the {Mobility::Backends::KeyValue} backend for Sequel models.
         include Mobility::Sequel::ColumnChanges.new(attributes)
       end
 
-      setup_query_methods(QueryMethods)
-
       # Returns translation for a given locale, or initializes one if none is present.
       # @param [Symbol] locale
       # @return [Mobility::Sequel::TextTranslation,Mobility::Sequel::StringTranslation]
