@@ -31,6 +31,9 @@ Implements the {Mobility::Backends::Json} backend for Sequel models.
         #   @return [String,Integer,Boolean] Updated value
         # @!endgroup
 
+        # @param [Symbol] name Attribute name
+        # @param [Symbol] locale Locale
+        # @return [Mobility::Backends::Sequel::Json::JSONOp]
         def self.build_op(attr, locale)
           column_name = column_affix % attr
           JSONOp.new(column_name.to_sym).get_text(locale.to_s)

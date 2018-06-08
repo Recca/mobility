@@ -24,6 +24,9 @@ Implements the {Mobility::Backends::Hstore} backend for Sequel models.
         end
         # @!endgroup
 
+        # @param [Symbol] name Attribute name
+        # @param [Symbol] locale Locale
+        # @return [Mobility::Backends::Sequel::Hstore::HStoreOp]
         def self.build_op(attr, locale)
           column_name = column_affix % attr
           HStoreOp.new(column_name.to_sym)[locale.to_s]

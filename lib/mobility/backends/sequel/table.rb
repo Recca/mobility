@@ -48,10 +48,18 @@ Implements the {Mobility::Backends::Table} backend for Sequel models.
         end
         # @!endgroup
 
+        # @param [Symbol] name Attribute name
+        # @param [Symbol] locale Locale
+        # @return [Sequel::SQL::QualifiedIdentifier]
         def build_op(attr, locale)
           ::Sequel::SQL::QualifiedIdentifier.new(table_alias(locale), attr)
         end
 
+        # @param [Sequel::Dataset] dataset Dataset to prepare
+        # @param [Object] predicate Predicate
+        # @param [Symbol] locale Locale
+        # @param [String] query_method
+        # @return [Sequel::Dataset] Prepared dataset
         def prepare_dataset(dataset, predicate, locale, query_method)
           join_translations(dataset, locale, :left_outer)
         end
