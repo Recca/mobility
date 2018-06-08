@@ -52,7 +52,7 @@ See ActiveRecord::Query plugin.
               return yield unless Hash === query_conds.first
 
               cond = query_conds.first.dup
-              locale = Mobility.locale
+              locale = cond.delete(:locale) || Mobility.locale
 
               _build(dataset, cond, locale, query_method, &block)
             end
