@@ -71,11 +71,12 @@ Implements the {Mobility::Backends::Table} backend for Sequel models.
             return dataset if joins.any? { |clause| clause.table_expr.alias == table_alias(locale) }
           end
           dataset.join_table(join_type,
-                             ::Sequel[translation_class.table_name].as(table_alias(locale)),
+                             translation_class.table_name,
                              {
                                locale: locale.to_s,
                                foreign_key => ::Sequel[model_class.table_name][:id]
-                             })
+                             },
+                             table_alias: table_alias(locale))
         end
       end
 
