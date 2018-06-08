@@ -170,6 +170,23 @@ describe "Mobility::Backends::Sequel::Table", orm: :sequel do
 
     describe "mobility scope (.i18n)" do
       include_querying_examples('Article')
+
+      describe "joins" do
+        it "uses inner join for WHERE queries if query has at least one non-null attribute" do
+          expect(Article.i18n.where(title: "foo", content: nil).sql).not_to match(/OUTER/)
+          expect(Article.i18n.where(title: "foo").where(content: nil).sql).not_to match(/OUTER/)
+          expect(Article.i18n.where(content: nil).where(title: "foo").sql).not_to match(/OUTER/)
+          expect(Article.i18n.where(title: "foo", content: [nil, "bar"]).sql).not_to match(/OUTER/)
+          expect(Article.i18n.where(title: "foo").where(content: [nil, "bar"]).sql).not_to match(/OUTER/)
+          expect(Article.i18n.where(content: [nil, "bar"]).where(title: "foo").sql).not_to match(/OUTER/)
+        end
+
+        it "does not use OUTER JOIN with .not" do
+          # we don't need an OUTER join when matching nil values since
+          # we're searching for negative matches
+          expect(Article.i18n.where.not(title: nil).sql).not_to match /OUTER/
+        end
+      end
     end
   end
 end if Mobility::Loaded::Sequel
