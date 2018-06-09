@@ -52,7 +52,7 @@ Implements the {Mobility::Backends::Table} backend for Sequel models.
         # @param [Symbol] locale Locale
         # @return [Sequel::SQL::QualifiedIdentifier]
         def build_op(attr, locale)
-          ::Sequel::SQL::QualifiedIdentifier.new(table_alias(locale), attr)
+          QualifiedIdentifier.new(table_alias(locale), attr, backend_class: self)
         end
 
         # @param [Sequel::Dataset] dataset Dataset to prepare
@@ -61,10 +61,35 @@ Implements the {Mobility::Backends::Table} backend for Sequel models.
         # @param [String] query_method
         # @return [Sequel::Dataset] Prepared dataset
         def prepare_dataset(dataset, predicate, locale, query_method)
-          join_translations(dataset, locale, :left_outer)
+          join_translations(dataset, locale, visit(predicate, locale))
         end
 
         private
+
+        def visit(predicate, locale)
+          case predicate
+          when Array
+            predicate.map { |obj|
+              visit(obj, locale).tap do |visited|
+                return visited if visited == :inner
+              end
+            }.compact.first
+          when QualifiedIdentifier
+            (table_alias(locale) == predicate.table) && :inner
+          when ::Sequel::SQL::BooleanExpression
+            if predicate.op == :'='
+              predicate.args.any? { |op| visit(op, locale) } && :inner
+            elsif predicate.op == :IS
+              predicate.args.any?(&:nil?) && :left_outer
+            else
+              visit(predicate.args, locale)
+            end
+          when ::Sequel::SQL::Expression
+            visit(predicate.args, locale)
+          else
+            nil
+          end
+        end
 
         def join_translations(dataset, locale, join_type)
           if joins = dataset.opts[:join]
@@ -77,6 +102,15 @@ Implements the {Mobility::Backends::Table} backend for Sequel models.
                                foreign_key => ::Sequel[model_class.table_name][:id]
                              },
                              table_alias: table_alias(locale))
+        end
+
+        class QualifiedIdentifier < ::Sequel::SQL::QualifiedIdentifier
+          attr_reader :backend_class, :locale
+
+          def initialize(table, column, backend_class: nil)
+            @backend_class = backend_class
+            super(table, column)
+          end
         end
       end
 
